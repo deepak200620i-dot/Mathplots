@@ -1,1 +1,3 @@
 /* /index.html   200
+# Format: /path-to-match/* /.netlify/functions/:splat 200
+/api/* /.netlify/functions/:splat 200
