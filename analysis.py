@@ -59,3 +59,70 @@ def interpolate_curve(times, values, num_points=500):
     smooth_values = cs(smooth_times)
     
     return smooth_times.tolist(), smooth_values.tolist()
+
+def calculate_slope(x, y):
+    """
+    Calculates the slope of the line of best fit for the given data points.
+    Returns the slope as a float, rounded to 4 decimal places.
+    """
+    x = np.array(x)
+    y = np.array(y)
+    
+    if len(x) < 2:
+        return 0.0
+        
+    # Fit a linear polynomial (degree 1)
+    # Returns [slope, intercept]
+    slope, intercept = np.polyfit(x, y, 1)
+    
+    return round(float(slope), 4)
+
+def is_straight_line(x, y, tolerance=0.01):
+    """
+    Determines if the data points form a straight line.
+    Uses R² (coefficient of determination) to check linearity.
+    Returns True if R² > (1 - tolerance), indicating a near-perfect linear fit.
+    """
+    x = np.array(x)
+    y = np.array(y)
+    
+    if len(x) < 2:
+        return False
+    
+    # Fit a linear model
+    slope, intercept = np.polyfit(x, y, 1)
+    y_pred = slope * x + intercept
+    
+    # Calculate R² (coefficient of determination)
+    ss_res = np.sum((y - y_pred) ** 2)  # Residual sum of squares
+    ss_tot = np.sum((y - np.mean(y)) ** 2)  # Total sum of squares
+    
+    # Handle edge case where all y values are the same
+    if ss_tot == 0:
+        return True  # Horizontal line
+    
+    r_squared = 1 - (ss_res / ss_tot)
+    
+    return r_squared > (1 - tolerance)
+
+def check_non_intersecting(times, y1, y2):
+    """
+    Checks if two data series don't intersect within the given time range.
+    Returns True if the lines are non-intersecting (parallel or don't cross).
+    """
+    times = np.array(times)
+    y1 = np.array(y1)
+    y2 = np.array(y2)
+    
+    if len(times) < 2:
+        return True
+    
+    # Calculate the difference between the two series
+    diff = y1 - y2
+    
+    # Check if all differences have the same sign
+    # If they do, the lines don't intersect
+    all_positive = np.all(diff >= 0)
+    all_negative = np.all(diff <= 0)
+    
+    return all_positive or all_negative

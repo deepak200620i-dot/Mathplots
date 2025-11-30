@@ -53,17 +53,35 @@ def plot():
             # Generate smooth curve data
             smooth_x, smooth_y = analysis.interpolate_curve(x_data, y_data)
             
+            # Calculate slope
+            slope = analysis.calculate_slope(x_data, y_data)
+            
             y_series.append({
                 'name': series_name, 
                 'data': y_data, # Raw data for markers
                 'smooth_x': smooth_x,
-                'smooth_y': smooth_y
+                'smooth_y': smooth_y,
+                'slope': slope
             })
 
-        # Find intersection if we have exactly 2 Y-series (Classic Charge/Discharge case)
+        # Find intersection only when appropriate
+        # Show slopes instead for:
+        # 1. Single straight line
+        # 2. Multiple non-intersecting straight lines
         intersection = None
         if len(y_series) == 2:
-            intersection = analysis.find_intersection(x_data, y_series[0]['data'], y_series[1]['data'])
+            # Check if both series are straight lines
+            is_line1_straight = analysis.is_straight_line(x_data, y_series[0]['data'])
+            is_line2_straight = analysis.is_straight_line(x_data, y_series[1]['data'])
+            
+            # Check if they're non-intersecting
+            non_intersecting = analysis.check_non_intersecting(x_data, y_series[0]['data'], y_series[1]['data'])
+            
+            # Only calculate intersection if:
+            # - At least one line is NOT straight (curved lines may intersect), OR
+            # - Both are straight but they DO intersect
+            if (not is_line1_straight or not is_line2_straight) or (is_line1_straight and is_line2_straight and not non_intersecting):
+                intersection = analysis.find_intersection(x_data, y_series[0]['data'], y_series[1]['data'])
 
         # Return raw data for client-side plotting
         return jsonify({
