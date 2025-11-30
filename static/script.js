@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         analyzeBtn.disabled = true;
 
         try {
-            const response = await fetch('https://mathplots.onrender.com', {
+            const response = await fetch('/Plot', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
