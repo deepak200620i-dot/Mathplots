@@ -645,3 +645,30 @@ td[colspan] input {
     max-height: 600px; /* Increased height */
     transition: max-height 0.3s ease;
 }
+/* Color Preset Styles */
+.color-preset-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.color-presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.color-preset-btn {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+}
+.color-preset-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.color-preset-btn:active {
+    transform: scale(0.95);
+}

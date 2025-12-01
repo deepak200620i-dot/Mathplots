@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.interpolate import CubicSpline
+from sklearn.linear_model import RANSACRegressor, LinearRegression
 
 def find_intersection(times, charge_v, discharge_v):
     """
@@ -126,3 +127,66 @@ def check_non_intersecting(times, y1, y2):
     all_negative = np.all(diff <= 0)
     
     return all_positive or all_negative
+
+def get_linear_fit_points(x, y):
+    """
+    Generates points for the line of best fit.
+    Returns (fit_x, fit_y) containing just the start and end points.
+    """
+    x = np.array(x)
+    y = np.array(y)
+    
+    if len(x) < 2:
+        return x.tolist(), y.tolist()
+        
+    # Fit a linear model
+    slope, intercept = np.polyfit(x, y, 1)
+    
+    # Generate start and end points based on x range
+    min_x, max_x = float(np.min(x)), float(np.max(x))
+    
+    fit_x = [min_x, max_x]
+    fit_y = [slope * min_x + intercept, slope * max_x + intercept]
+    
+    return fit_x, fit_y
+
+def get_best_fit_curve(x, y):
+    """
+    Uses RANSAC to determine if data should be fitted with a straight line or curve.
+    Returns (fit_x, fit_y, is_straight_line).
+    
+    If >= 80% of points fit a straight line (inliers), returns a straight line.
+    Otherwise, returns a cubic spline curve.
+    """
+    x = np.array(x)
+    y = np.array(y)
+    
+    if len(x) < 2:
+        return x.tolist(), y.tolist(), False
+    
+    # Prepare data for RANSAC (reshape x to 2D)
+    X = x.reshape(-1, 1)
+    
+    # Use RANSAC to find the straight line that fits the maximum points
+    ransac = RANSACRegressor(LinearRegression(), residual_threshold=0.05)
+    ransac.fit(X, y)
+    
+    # Count how many points lie on the RANSAC line
+    inliers = ransac.inlier_mask_
+    num_inliers = inliers.sum()
+    
+    # If enough points lie on one straight line, treat it as straight
+    STRAIGHT_LINE_THRESHOLD = 0.80  # 80% points must lie on same straight line
+    
+    if num_inliers / len(x) >= STRAIGHT_LINE_THRESHOLD:
+        # Plot only the best-fitting straight line
+        # Use first and last x for clean straight display
+        line_x = np.array([x.min(), x.max()])
+        line_X = line_x.reshape(-1, 1)
+        line_y = ransac.predict(line_X)
+        
+        return line_x.tolist(), line_y.tolist(), True
+    else:
+        # Use cubic spline for nonlinear graphs
+        smooth_x, smooth_y = interpolate_curve(x, y)
+        return smooth_x, smooth_y, False

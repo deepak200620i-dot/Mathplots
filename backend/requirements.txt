@@ -1,5 +1,0 @@
-flask
-plotly
-numpy
-scipy
-gunicorn

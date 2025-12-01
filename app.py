@@ -50,8 +50,8 @@ def plot():
             series_name = headers[i]
             y_data = parsed_columns[i]
             
-            # Generate smooth curve data
-            smooth_x, smooth_y = analysis.interpolate_curve(x_data, y_data)
+            # Generate smooth curve data or line of best fit using RANSAC
+            smooth_x, smooth_y, is_straight = analysis.get_best_fit_curve(x_data, y_data)
             
             # Calculate slope
             slope = analysis.calculate_slope(x_data, y_data)
@@ -100,4 +100,4 @@ def plot():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

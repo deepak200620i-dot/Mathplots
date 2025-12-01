@@ -2,4 +2,5 @@ flask
 plotly
 numpy
 scipy
+scikit-learn
 gunicorn

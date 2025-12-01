@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let columnCount = 3;
 
     // --- Initialization ---
-    // --- Initialization ---
     initTheme();
     initTable();
 
@@ -64,20 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function setTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
-
         // Update icon
         const icon = themeToggleBtn.querySelector('.icon');
         icon.textContent = theme === 'dark' ? '☀️' : '🌙';
-
-        // Update Plotly if it exists
-        if (plotDiv.data) {
-            const layoutUpdate = {
-                paper_bgcolor: theme === 'dark' ? '#1e293b' : '#ffffff',
-                plot_bgcolor: theme === 'dark' ? '#1e293b' : '#ffffff',
-                font: { color: theme === 'dark' ? '#f1f5f9' : '#1e293b' }
-            };
-            Plotly.relayout(plotDiv, layoutUpdate);
-        }
     }
 
     themeToggleBtn.addEventListener('click', () => {
@@ -252,8 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } else if (e.key.startsWith('Arrow')) {
-            // Basic navigation logic could go here, but browser default handles left/right inside input.
-            // Up/Down could be added similar to Enter.
             const currentInput = e.target;
             const currentTd = currentInput.parentElement;
             const currentTr = currentTd.parentElement;
@@ -331,25 +317,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedCells.push(cell);
             }
         } else {
-            // Clear selection if not holding Ctrl
-            // But we want to allow normal clicking to edit. 
-            // So maybe only clear if we click outside? 
-            // Or just have a "Clear Selection" button?
-            // For now, let's just clear if we click without Ctrl, but AFTER the click action?
-            // Actually, standard behavior is click clears others.
-            // But we need to edit.
-            // Let's say: Ctrl+Click adds to selection.
-            // If we want to clear, maybe the Clear button does it?
-            // Or just clicking elsewhere clears it?
-            // Let's keep it simple: Ctrl+Click toggles.
-            // If you click without Ctrl, it clears previous selection (unless it's the same cell).
             if (selectedCells.length > 0) {
                 selectedCells.forEach(c => c.classList.remove('cell-selected'));
                 selectedCells = [];
             }
-            // Add current if we want to start a drag? No, let's stick to Ctrl+Click for multi-select for now.
-            // Or maybe Shift+Click?
-            // Let's just use Ctrl+Click for simplicity in this version.
         }
     }
 
@@ -358,10 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Select at least 2 cells to merge (Ctrl+Click).");
             return;
         }
-
-        // Sort cells by position (row then col)
-        // This is complex because we need to know their coordinates.
-        // Simplified: only allow merging in the same row.
 
         const firstCell = selectedCells[0];
         const row = firstCell.parentElement;
@@ -403,7 +370,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Graph Resizing ---
-    // --- Graph Resizing ---
     function resizeGraph() {
         const w = parseInt(graphWidth.value) || 800;
         const h = parseInt(graphHeight.value) || 500;
@@ -411,8 +377,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         container.style.width = w + 'px';
         container.style.height = h + 'px';
-
-        // Plotly resize will be handled by Observer
     }
 
     graphWidth.addEventListener('change', resizeGraph);
@@ -433,15 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const rowData = [];
             let hasData = false;
 
-            // We need to handle colspan. 
-            // If a cell has colspan N, we replicate the value N times?
-            // Or we just take the value once and fill others with null?
-            // For plotting, usually we want x, y1, y2...
-            // If we merge, it implies the value applies to multiple columns or it's just a visual grouping.
-            // Let's replicate the value for now to keep arrays aligned.
-
             const cells = Array.from(row.children);
-            // Filter out the action cell (last one usually, but check for button)
 
             cells.forEach(td => {
                 if (td.querySelector('button')) return; // Skip action cell
@@ -557,7 +513,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const traces = [];
 
         // Data Traces
-        // Data Traces
         data.series.forEach((series, index) => {
             const color = index === 0 ? '#1f77b4' : '#ff7f0e'; // Default colors for first 2 series
 
@@ -598,23 +553,33 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Get background color
+        const bgColor = '#ffffff';
+        const fontColor = '#1e293b';
         const layout = {
             title: {
                 text: data.layout.title,
-                font: { size: 24 }
+                font: { size: 24, color: fontColor }
             },
             xaxis: {
                 title: data.layout.xaxis.title,
                 showgrid: true,
-                zeroline: true
+                zeroline: true,
+                gridcolor: '#e2e8f0',
+                color: fontColor
             },
             yaxis: {
                 title: data.layout.yaxis.title,
                 showgrid: true,
-                zeroline: true
+                zeroline: true,
+                gridcolor: '#e2e8f0',
+                color: fontColor
             },
+            paper_bgcolor: bgColor,
+            plot_bgcolor: bgColor,
+            font: { color: fontColor },
             hovermode: 'closest',
-            dragmode: 'zoom', // Default to zoom
+            dragmode: 'zoom',
             showlegend: true
         };
 
